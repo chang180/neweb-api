@@ -1,0 +1,31 @@
+services:
+  api_test_php:
+    image: newebpay_php:8.4-fpm-xdebug
+    container_name: api_test_php
+    volumes:
+      - .:/var/www/html
+    environment:
+      - XDEBUG_MODE=debug,develop
+      - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9010 start_with_request=yes
+      - PHP_IDE_CONFIG=serverName=Docker
+    networks:
+      - api_test_network
+    restart: unless-stopped
+
+  api_test_nginx:
+    image: nginx:alpine
+    container_name: api_test_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - api_test_php
+    networks:
+      - api_test_network
+    restart: unless-stopped
+
+networks:
+  api_test_network:
+    driver: bridge
